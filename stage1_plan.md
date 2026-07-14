@@ -17,11 +17,12 @@ Already confirmed by direct inspection of the CSV:
 **Section 0 — Setup**
 - Load CSV, set `TARGET`, print shape + baseline drop rate.
 - One `clean_text(series)` helper (uppercase, strip non-alphanumeric, collapse whitespace) — reused by every dirty categorical column, not reimplemented per cell.
-- Three investigate helpers, one per variable type, each producing: summary stats, one primary chart, a statistical test, and a printed prompt block ("What can you infer about `<col>`?") for the human interpretation to be written directly underneath in a markdown cell:
-  - `investigate_numeric(col)` — describe(), histogram + boxplot, sentinel/outlier flags, point-biserial correlation or Mann-Whitney vs. target.
-  - `investigate_categorical(col, clean=True)` — value_counts, bar chart of category rate vs. target baseline, rare-category summary, chi-square test.
+- Three investigate helpers, one per variable type, each producing: summary stats, one primary chart, and a printed prompt block ("What can you infer about `<col>`?") for the human interpretation to be written directly underneath in a markdown cell. Report the effect straight from the groupby table/chart (rate vs. baseline, n per group) — only add a formal test (Mann-Whitney, chi-square) when the effect is genuinely ambiguous from the chart and every group compared has enough n to make a test meaningful:
+  - `investigate_numeric(col)` — describe(), histogram + boxplot, sentinel/outlier flags, per-value/per-bucket rate vs. target.
+  - `investigate_categorical(col, clean=True)` — value_counts, bar chart of category rate vs. target baseline, rare-category summary.
   - `investigate_datetime(col)` — parse, distribution over time, rate-over-time line chart, seasonality check vs. target.
 - Every helper returns the summary table (not just prints) so it can feed the correlation section later.
+- Every number cited in an interpretation markdown cell must be printed or plotted by the code cell directly above it — no side computation done outside the notebook and typed in from memory. If a stat is needed for the write-up, add the `print`/annotation to the cell first (see `feature-engineering` skill for two real examples this caught).
 
 **Section 1 — Variable-by-variable pass, in priority order (below)**
 Each variable gets: 1 code cell (`investigate_x("Column_Name")`) + 1 markdown cell (your written interpretation, prompted by the printed question). No column skipped, low-priority ones just come last.
